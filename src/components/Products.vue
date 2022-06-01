@@ -1,16 +1,29 @@
 <script>
+import notFound from '@/assets/img/not-found.png';
 export default {
+  data() {
+    return {
+      notFoundImage: notFound,
+    };
+  },
   props: ['products'],
 };
 </script>
 <template>
   <ul :class="$style.list">
     <li v-for="(product, index) in products" :key="index" :class="$style.item">
-      <img :src="product.image" alt="Картинка товара" :class="$style.img" />
-      <div :class="$style.container">
-        <p :class="$style.name">{{ product.name }}</p>
-        <p :class="$style.description">{{ product.description }}</p>
-        <p :class="$style.price">{{ product.price }} руб.</p>
+      <div :class="$style.wrapper">
+        <img
+          :src="product.image"
+          alt="Изображение товара"
+          :class="$style.img"
+          @error="(e) => (e.currentTarget.src = notFoundImage)"
+        />
+        <div :class="$style.container">
+          <p :class="$style.name">{{ product.name }}</p>
+          <p :class="$style.description">{{ product.description }}</p>
+          <p :class="$style.price">{{ product.price }} руб.</p>
+        </div>
       </div>
     </li>
   </ul>
@@ -40,7 +53,8 @@ export default {
 }
 
 .item {
-  position: relative;
+  overflow: hidden;
+  width: 100%;
   border-radius: 4px;
   background-color: $white;
   box-shadow: 0px 20px 30px rgba(0, 0, 0, 0.04),
@@ -52,10 +66,29 @@ export default {
   }
 }
 
+.wrapper {
+  position: relative;
+  animation: show 0.5s;
+}
+
+@keyframes show {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .img {
   width: 100%;
   height: 200px;
   object-fit: cover;
+  color: blue;
+  font-size: 16px;
+  text-align: center;
 }
 
 .name {

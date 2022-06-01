@@ -1,6 +1,7 @@
 <script>
 import Input from '@/components/Input.vue';
 export default {
+  emits: ['addProduct'],
   data() {
     return {
       inputs: [
@@ -8,18 +9,34 @@ export default {
           field: 'input',
           label: 'Наименование товара',
           placeholder: 'Введите наименование товара',
+          key: 'name',
+          value: null,
+          required: true,
         },
         {
           field: 'textarea',
           label: 'Описание товара',
           placeholder: 'Введите описание товара',
+          key: 'description',
+          value: null,
+          required: false,
         },
         {
           field: 'input',
           label: 'Ссылка на изображение товара',
           placeholder: 'Введите ссылку',
+          key: 'image',
+          value: null,
+          required: true,
         },
-        { field: 'input', label: 'Цена товара', placeholder: 'Введите цену' },
+        {
+          field: 'input',
+          label: 'Цена товара',
+          placeholder: 'Введите цену',
+          key: 'price',
+          value: null,
+          required: true,
+        },
       ],
       showForm: false,
     };
@@ -28,8 +45,31 @@ export default {
     Input,
   },
   methods: {
+    addThousandsSeparator(number) {
+      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    },
     toggleForm() {
       this.showForm = !this.showForm;
+    },
+    addProduct() {
+      const product = this.inputs.reduce((acc, val) => {
+        return {
+          ...acc,
+          [val.key]: val.value,
+        };
+      }, {});
+      this.showForm = false;
+      this.inputs.map((item) => (item.value = ''));
+      this.$emit('addProduct', product);
+    },
+    maskForPrice(input, value) {
+      if (input.key === 'price') {
+        const reg = /[A-zА-я]/g;
+        const validateValue = value.split(' ').join('').replace(reg, '');
+        return this.addThousandsSeparator(validateValue);
+      } else {
+        return value;
+      }
     },
   },
   watch: {
@@ -41,6 +81,17 @@ export default {
       }
     },
   },
+  computed: {
+    disabledButton() {
+      for (let i = 0; i < this.inputs.length; i++) {
+        const { value, required } = this.inputs[i];
+        if (!value && required) {
+          return true;
+        }
+      }
+      return false;
+    },
+  },
 };
 </script>
 <template>
@@ -48,14 +99,26 @@ export default {
     <div :class="$style.inputs">
       <div v-for="input in inputs" :key="input.label" :class="$style.input">
         <Input
+          type="number"
+          :modelValue="input.value"
+          @update:modelValue="
+            (newValue) => (input.value = maskForPrice(input, newValue))
+          "
           :field="input.field"
           :label="input.label"
           :placeholder="input.placeholder"
+          :required="input.required"
         />
       </div>
     </div>
     <div :class="$style.buttons">
-      <button :class="$style.button">Добавить товар</button>
+      <button
+        :class="$style.button"
+        @click="addProduct"
+        :disabled="disabledButton"
+      >
+        Добавить товар
+      </button>
       <button :class="[$style.button, $style.backButton]" @click="toggleForm">
         Назад
       </button>
@@ -105,7 +168,7 @@ export default {
 
 .input {
   &:not(:first-child) {
-    margin-top: 16px;
+    margin-top: 2px;
   }
 }
 
@@ -136,6 +199,7 @@ export default {
   &:disabled {
     background-color: #eeeeee;
     color: $gray;
+    cursor: auto;
   }
   @media (max-width: $container-small-size) {
     justify-self: end;

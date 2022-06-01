@@ -30,9 +30,12 @@ export default {
         this.data.push(product);
       }
     },
+    addProduct(product) {
+      this.data.push(product);
+    },
   },
   created() {
-    this.fetchData(10);
+    this.fetchData(3);
   },
 };
 </script>
@@ -40,7 +43,7 @@ export default {
 <template>
   <Layout>
     <Header />
-    <AddForm />
+    <AddForm @addProduct="addProduct" />
     <Products :products="data" />
   </Layout>
 </template>
