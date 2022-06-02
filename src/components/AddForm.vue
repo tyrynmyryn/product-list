@@ -59,7 +59,7 @@ export default {
         };
       }, {});
       this.showForm = false;
-      this.inputs.map((item) => (item.value = ''));
+      this.inputs.map((item) => (item.value = null));
       this.$emit('addProduct', product);
     },
     maskForPrice(input, value) {
